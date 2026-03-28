@@ -1,6 +1,10 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { AuditSection, AuditSummary } from '@/types/audit';
+import type { AuditSection } from '@/types/audit';
+import type { AuditSummary } from '@/types/audit';
 import { INITIAL_AUDIT_DATA, getKategoriPenilaian } from '@/types/audit';
+
+// Re-export AuditSummary for use in other modules
+export type { AuditSummary };
 
 export interface AuditState {
   area: string;
@@ -71,6 +75,70 @@ export const useAudit = () => {
       )
     }));
   }, []);
+
+  // Update photo for a question
+  const updatePhoto = useCallback((sectionKey: string, questionId: number, photoLocal: string | null) => {
+    setAuditState(prev => ({
+      ...prev,
+      sections: prev.sections.map(section => 
+        section.key === sectionKey
+          ? {
+              ...section,
+              questions: section.questions.map(q =>
+                q.id === questionId ? { ...q, photoLocal } : q
+              )
+            }
+          : section
+      )
+    }));
+  }, []);
+
+  // Update photo URL (after Firebase upload)
+  const updatePhotoUrl = useCallback((sectionKey: string, questionId: number, photoUrl: string | null) => {
+    setAuditState(prev => ({
+      ...prev,
+      sections: prev.sections.map(section => 
+        section.key === sectionKey
+          ? {
+              ...section,
+              questions: section.questions.map(q =>
+                q.id === questionId ? { ...q, photoUrl } : q
+              )
+            }
+          : section
+      )
+    }));
+  }, []);
+
+  // Get all photos that need to be uploaded
+  const getPendingPhotos = useCallback((): Array<{
+    sectionKey: string;
+    questionId: number;
+    imageBase64: string;
+  }> => {
+    const photos: Array<{ sectionKey: string; questionId: number; imageBase64: string }> = [];
+    
+    auditState.sections.forEach(section => {
+      section.questions.forEach(q => {
+        if (q.photoLocal && !q.photoUrl) {
+          photos.push({
+            sectionKey: section.key,
+            questionId: q.id,
+            imageBase64: q.photoLocal
+          });
+        }
+      });
+    });
+    
+    return photos;
+  }, [auditState.sections]);
+
+  // Get total photo count
+  const photoCount = useMemo(() => {
+    return auditState.sections.reduce((total, section) => {
+      return total + section.questions.filter(q => q.photoLocal || q.photoUrl).length;
+    }, 0);
+  }, [auditState.sections]);
 
   const resetAudit = useCallback(() => {
     setAuditState({
@@ -173,12 +241,16 @@ export const useAudit = () => {
     radarData,
     isComplete,
     hasScores,
+    photoCount,
     setArea,
     setLokasi,
     toggleAuditor,
     setTanggal,
     updateScore,
     updateComment,
+    updatePhoto,
+    updatePhotoUrl,
+    getPendingPhotos,
     resetAudit
   };
 };

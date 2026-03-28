@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -8,14 +9,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { CameraCapture } from '@/components/CameraCapture';
 import type { AuditSection } from '@/types/audit';
 import { SCORE_OPTIONS } from '@/types/audit';
-import { ClipboardList, MessageSquare, Star } from 'lucide-react';
+import { ClipboardList, MessageSquare, Star, Camera, ImageIcon } from 'lucide-react';
 
 interface AuditChecklistProps {
   sections: AuditSection[];
   onScoreChange: (sectionKey: string, questionId: number, score: number | null) => void;
   onCommentChange: (sectionKey: string, questionId: number, comment: string) => void;
+  onPhotoChange: (sectionKey: string, questionId: number, photoLocal: string | null) => void;
 }
 
 const getSectionColor = (sectionName: string): string => {
@@ -45,8 +49,20 @@ const getSectionBgColor = (sectionName: string): string => {
 export const AuditChecklist = ({
   sections,
   onScoreChange,
-  onCommentChange
+  onCommentChange,
+  onPhotoChange
 }: AuditChecklistProps) => {
+  const [activeCamera, setActiveCamera] = useState<{sectionKey: string, questionId: number} | null>(null);
+
+  const handlePhotoCapture = (sectionKey: string, questionId: number, imageBase64: string) => {
+    onPhotoChange(sectionKey, questionId, imageBase64);
+    setActiveCamera(null);
+  };
+
+  const handlePhotoDelete = (sectionKey: string, questionId: number) => {
+    onPhotoChange(sectionKey, questionId, null);
+  };
+
   return (
     <div className="space-y-6">
       {sections.map((section) => (
@@ -64,16 +80,22 @@ export const AuditChecklist = ({
                   <tr className="bg-slate-100 border-b border-slate-200">
                     <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 w-12">No</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">Pertanyaan</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 w-32">
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 w-28">
                       <div className="flex items-center justify-center gap-1">
                         <Star className="w-3 h-3" />
                         Score
                       </div>
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 w-1/3">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 w-[25%]">
                       <div className="flex items-center gap-1">
                         <MessageSquare className="w-3 h-3" />
-                        Temuan / Saran Perbaikan
+                        Temuan
+                      </div>
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 w-20">
+                      <div className="flex items-center justify-center gap-1">
+                        <Camera className="w-3 h-3" />
+                        Foto
                       </div>
                     </th>
                   </tr>
@@ -130,9 +152,56 @@ export const AuditChecklist = ({
                         <Textarea
                           value={question.comment}
                           onChange={(e) => onCommentChange(section.key, question.id, e.target.value)}
-                          placeholder="Tuliskan temuan dan saran perbaikan di sini..."
+                          placeholder="Tuliskan temuan..."
                           className="min-h-[60px] text-sm bg-white border-slate-300 focus:ring-2 focus:ring-blue-500 resize-y"
                         />
+                      </td>
+                      <td className="px-4 py-3">
+                        <Dialog 
+                          open={activeCamera?.sectionKey === section.key && activeCamera?.questionId === question.id}
+                          onOpenChange={(open) => {
+                            if (!open) setActiveCamera(null);
+                          }}
+                        >
+                          <DialogTrigger asChild>
+                            <button
+                              onClick={() => setActiveCamera({ sectionKey: section.key, questionId: question.id })}
+                              className={`w-full h-12 rounded-lg border-2 border-dashed flex items-center justify-center transition-colors ${
+                                question.photoLocal || question.photoUrl
+                                  ? 'border-green-400 bg-green-50 hover:bg-green-100'
+                                  : 'border-slate-300 hover:border-blue-400 hover:bg-blue-50'
+                              }`}
+                            >
+                              {question.photoLocal || question.photoUrl ? (
+                                <div className="flex items-center gap-1">
+                                  <ImageIcon className="w-4 h-4 text-green-600" />
+                                  <Badge className="bg-green-500 text-white text-xs">Ada</Badge>
+                                </div>
+                              ) : (
+                                <Camera className="w-5 h-5 text-slate-400" />
+                              )}
+                            </button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                <Camera className="w-5 h-5" />
+                                Ambil Foto Temuan
+                              </DialogTitle>
+                            </DialogHeader>
+                            <div className="mt-4">
+                              <p className="text-sm text-slate-600 mb-4">
+                                {question.question.substring(0, 80)}...
+                              </p>
+                              <CameraCapture
+                                onCapture={(imageBase64) => handlePhotoCapture(section.key, question.id, imageBase64)}
+                                onCancel={() => setActiveCamera(null)}
+                                existingPhoto={question.photoLocal || question.photoUrl}
+                                onDelete={() => handlePhotoDelete(section.key, question.id)}
+                              />
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </td>
                     </tr>
                   ))}

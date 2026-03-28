@@ -5,6 +5,8 @@ export interface AuditQuestion {
   question: string;
   score: number | null;
   comment: string;
+  photoUrl?: string | null; // URL foto temuan
+  photoLocal?: string | null; // Base64 untuk preview sebelum upload
 }
 
 export interface AuditSection {
@@ -113,81 +115,81 @@ export const INITIAL_AUDIT_DATA: AuditSection[] = [
     name: "SORT",
     key: "SORT",
     questions: [
-      { id: 1, question: "Apakah semua barang di area kerja sudah dipilah-pilah berdasarkan kategorinya (misalnya, alat kerja, dokumen, material, chemical)?", score: null, comment: "" },
-      { id: 2, question: "Apakah terdapat barang yang tidak dikategorikan?", score: null, comment: "" },
-      { id: 3, question: "Apakah terdapat barang yang tercampur dengan kategori lain?", score: null, comment: "" },
-      { id: 4, question: "Apakah semua barang yang tidak diperlukan (tidak dipakai, rusak, usang) telah diidentifikasi?", score: null, comment: "" },
-      { id: 5, question: "Apakah barang yang tidak diperlukan telah dipisahkan secara fisik dari barang yang masih dipakai?", score: null, comment: "" },
-      { id: 6, question: "Apakah terdapat area khusus untuk penyimpanan barang yang tidak diperlukan?", score: null, comment: "" },
-      { id: 7, question: "Apakah semua barang yang tidak diperlukan telah diberi tanda yang jelas (Red Tag)?", score: null, comment: "" },
-      { id: 8, question: "Apakah terdapat format standar untuk penandaan/pelabelan (Red Tag)?", score: null, comment: "" },
-      { id: 9, question: "Apakah tempat penyimpanan sementara, aman dan terhindar dari kerusakan?", score: null, comment: "" },
-      { id: 10, question: "Apakah semua item yang diberi label Red Tag telah ditangani?", score: null, comment: "" }
+      { id: 1, question: "Apakah semua barang di area kerja sudah dipilah-pilah berdasarkan kategorinya (misalnya, alat kerja, dokumen, material, chemical)?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 2, question: "Apakah terdapat barang yang tidak dikategorikan?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 3, question: "Apakah terdapat barang yang tercampur dengan kategori lain?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 4, question: "Apakah semua barang yang tidak diperlukan (tidak dipakai, rusak, usang) telah diidentifikasi?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 5, question: "Apakah barang yang tidak diperlukan telah dipisahkan secara fisik dari barang yang masih dipakai?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 6, question: "Apakah terdapat area khusus untuk penyimpanan barang yang tidak diperlukan?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 7, question: "Apakah semua barang yang tidak diperlukan telah diberi tanda yang jelas (Red Tag)?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 8, question: "Apakah terdapat format standar untuk penandaan/pelabelan (Red Tag)?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 9, question: "Apakah tempat penyimpanan sementara, aman dan terhindar dari kerusakan?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 10, question: "Apakah semua item yang diberi label Red Tag telah ditangani?", score: null, comment: "", photoUrl: null, photoLocal: null }
     ]
   },
   {
     name: "SET IN ORDER",
     key: "SETINORDER",
     questions: [
-      { id: 1, question: "Apakah semua barang, peralatan atau dokumen disimpan di tempat yang ditentukan?", score: null, comment: "" },
-      { id: 2, question: "Apakah tempat penyimpanan mudah diakses dan terlihat dengan jelas?", score: null, comment: "" },
-      { id: 3, question: "Apakah barang, peralatan atau dokumen ditata dengan rapi dan teratur?", score: null, comment: "" },
-      { id: 4, question: "Apakah area kerja terbebas dari berbagai objek yang tidak diperlukan?", score: null, comment: "" },
-      { id: 5, question: "Apakah barang, peralatan atau dokumen yang sering digunakan, disimpan di tempat yang mudah dijangkau?", score: null, comment: "" },
-      { id: 6, question: "Penyimpanan tool dirancang sedemikian rupa sehingga cepat ditemukan dan mudah dijangkau saat dibutuhkan. Tempat penyimpanan ada label, jika tool tidak ada dapat dengan mudah diketahui/diidentifikasi.", score: null, comment: "" },
-      { id: 7, question: "Kertas-kertas kerja memiliki identitas yang jelas, ditempatkan di lokasi yang telah ditentukan, dan mudah dilihat atau ditemukan.", score: null, comment: "" },
-      { id: 8, question: "Peralatan, mesin/equipment memiliki identitas yang jelas (nomor, nama, kode warna, dll) dan ditempatkan di area yang telah ditentukan.", score: null, comment: "" }
+      { id: 1, question: "Apakah semua barang, peralatan atau dokumen disimpan di tempat yang ditentukan?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 2, question: "Apakah tempat penyimpanan mudah diakses dan terlihat dengan jelas?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 3, question: "Apakah barang, peralatan atau dokumen ditata dengan rapi dan teratur?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 4, question: "Apakah area kerja terbebas dari berbagai objek yang tidak diperlukan?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 5, question: "Apakah barang, peralatan atau dokumen yang sering digunakan, disimpan di tempat yang mudah dijangkau?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 6, question: "Penyimpanan tool dirancang sedemikian rupa sehingga cepat ditemukan dan mudah dijangkau saat dibutuhkan. Tempat penyimpanan ada label, jika tool tidak ada dapat dengan mudah diketahui/diidentifikasi.", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 7, question: "Kertas-kertas kerja memiliki identitas yang jelas, ditempatkan di lokasi yang telah ditentukan, dan mudah dilihat atau ditemukan.", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 8, question: "Peralatan, mesin/equipment memiliki identitas yang jelas (nomor, nama, kode warna, dll) dan ditempatkan di area yang telah ditentukan.", score: null, comment: "", photoUrl: null, photoLocal: null }
     ]
   },
   {
     name: "SAFETY",
     key: "SAFETY",
     questions: [
-      { id: 1, question: "Tidak ada alat-alat kerja yang menyebabkan bahaya terlilit/tersandung, seperti kabel listrik, tali, dll.", score: null, comment: "" },
-      { id: 2, question: "Panel listrik mudah terlihat dan lokasinya mudah dijangkau saat terjadi kondisi darurat (tidak terhalangi/tertutup benda lain).", score: null, comment: "" },
-      { id: 3, question: "Fire extinguisher/alat pemadam api ringan (APAR) dan perlengkapan emergency yang lain (kotak P3K, tandu, dll) harus mudah dilihat dan ditemukan, misalnya dengan dibantu label penunjuk.", score: null, comment: "" },
-      { id: 4, question: "Kondisi kerja ergonomis, tools ditempatkan di ketinggian yang sesuai, alat-alat bantu untuk mengangkat tersedia, dll.", score: null, comment: "" },
-      { id: 5, question: "Petunjuk penggunaan perlengkapan safety terbaca dengan jelas.", score: null, comment: "" },
-      { id: 6, question: "Apakah jalur evakuasi dan pintu darurat mudah diakses dan tidak terhalang oleh peralatan atau material?", score: null, comment: "" },
-      { id: 7, question: "Apakah bahan kimia dan material berbahaya disimpan dan diberi label dengan benar sesuai dengan standar keselamatan?", score: null, comment: "" }
+      { id: 1, question: "Tidak ada alat-alat kerja yang menyebabkan bahaya terlilit/tersandung, seperti kabel listrik, tali, dll.", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 2, question: "Panel listrik mudah terlihat dan lokasinya mudah dijangkau saat terjadi kondisi darurat (tidak terhalangi/tertutup benda lain).", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 3, question: "Fire extinguisher/alat pemadam api ringan (APAR) dan perlengkapan emergency yang lain (kotak P3K, tandu, dll) harus mudah dilihat dan ditemukan, misalnya dengan dibantu label penunjuk.", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 4, question: "Kondisi kerja ergonomis, tools ditempatkan di ketinggian yang sesuai, alat-alat bantu untuk mengangkat tersedia, dll.", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 5, question: "Petunjuk penggunaan perlengkapan safety terbaca dengan jelas.", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 6, question: "Apakah jalur evakuasi dan pintu darurat mudah diakses dan tidak terhalang oleh peralatan atau material?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 7, question: "Apakah bahan kimia dan material berbahaya disimpan dan diberi label dengan benar sesuai dengan standar keselamatan?", score: null, comment: "", photoUrl: null, photoLocal: null }
     ]
   },
   {
     name: "SHINE",
     key: "SHINE",
     questions: [
-      { id: 1, question: "Apakah area kerja, termasuk lantai, dinding, dan permukaannya, bersih dari debu, kotoran, dan noda?", score: null, comment: "" },
-      { id: 2, question: "Apakah alat pembersih (seperti sapu, kain lap, dan vacuum cleaner) tersedia dan ditata dengan baik di area kerja?", score: null, comment: "" },
-      { id: 3, question: "Apakah sampah dan limbah dibuang dengan benar dan ditempatkan di tempat sampah yang sesuai?", score: null, comment: "" },
-      { id: 4, question: "Apakah jadwal pembersihan dan perawatan telah dipajang dan diikuti oleh semua anggota tim di area kerja?", score: null, comment: "" },
-      { id: 5, question: "Kertas-kertas tidak kusut, robek, terjaga kebersihannya dan terlindungi dari kotoran (debu, noda, dll).", score: null, comment: "" },
-      { id: 6, question: "Alas kerja/work surface (mesin, meja kerja dan perlengkapan kerja yang lain termasuk panel elektrik) bersih dan dicat.", score: null, comment: "" },
-      { id: 7, question: "Lantai terbebas dari kotoran, puing, oli, wadah kosong, material, dll. Jika terdapat saluran pembuangan, lokasinya sesuai dan tidak tersumbat.", score: null, comment: "" },
-      { id: 8, question: "Dinding, tembok, partisi, dll dicat dan terjaga kebersihannya.", score: null, comment: "" },
-      { id: 9, question: "Apakah lantai, dinding, langit-langit, dan pipa berada dalam kondisi baik serta bebas dari kotoran/debu?", score: null, comment: "" }
+      { id: 1, question: "Apakah area kerja, termasuk lantai, dinding, dan permukaannya, bersih dari debu, kotoran, dan noda?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 2, question: "Apakah alat pembersih (seperti sapu, kain lap, dan vacuum cleaner) tersedia dan ditata dengan baik di area kerja?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 3, question: "Apakah sampah dan limbah dibuang dengan benar dan ditempatkan di tempat sampah yang sesuai?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 4, question: "Apakah jadwal pembersihan dan perawatan telah dipajang dan diikuti oleh semua anggota tim di area kerja?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 5, question: "Kertas-kertas tidak kusut, robek, terjaga kebersihannya dan terlindungi dari kotoran (debu, noda, dll).", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 6, question: "Alas kerja/work surface (mesin, meja kerja dan perlengkapan kerja yang lain termasuk panel elektrik) bersih dan dicat.", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 7, question: "Lantai terbebas dari kotoran, puing, oli, wadah kosong, material, dll. Jika terdapat saluran pembuangan, lokasinya sesuai dan tidak tersumbat.", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 8, question: "Dinding, tembok, partisi, dll dicat dan terjaga kebersihannya.", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 9, question: "Apakah lantai, dinding, langit-langit, dan pipa berada dalam kondisi baik serta bebas dari kotoran/debu?", score: null, comment: "", photoUrl: null, photoLocal: null }
     ]
   },
   {
     name: "STANDARDIZE",
     key: "STANDARDIZE",
     questions: [
-      { id: 1, question: "Apakah ada jadwal rutin untuk menginspeksi kepatuhan terhadap standar yang telah diterapkan?", score: null, comment: "" },
-      { id: 2, question: "Apakah terdapat standar terdokumentasi untuk setiap elemen 6S di area kerja?", score: null, comment: "" },
-      { id: 3, question: "Apakah ada tindakan korektif yang ditetapkan dan diterapkan jika standar tidak diikuti atau terjadi penyimpangan?", score: null, comment: "" },
-      { id: 4, question: "Apakah semua alat, bahan, dan peralatan ditempatkan sesuai dengan standar penempatan yang telah ditetapkan (misalnya, lokasi yang ditandai)?", score: null, comment: "" },
-      { id: 5, question: "Apakah ada panduan visual yang memudahkan untuk memahami dan menerapkan standar yang ada?", score: null, comment: "" },
-      { id: 6, question: "Apakah tampilan informasi, tanda, kode warna, dan penandaan lainnya telah ditetapkan di area kerja?", score: null, comment: "" }
+      { id: 1, question: "Apakah ada jadwal rutin untuk menginspeksi kepatuhan terhadap standar yang telah diterapkan?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 2, question: "Apakah terdapat standar terdokumentasi untuk setiap elemen 6S di area kerja?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 3, question: "Apakah ada tindakan korektif yang ditetapkan dan diterapkan jika standar tidak diikuti atau terjadi penyimpangan?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 4, question: "Apakah semua alat, bahan, dan peralatan ditempatkan sesuai dengan standar penempatan yang telah ditetapkan (misalnya, lokasi yang ditandai)?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 5, question: "Apakah ada panduan visual yang memudahkan untuk memahami dan menerapkan standar yang ada?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 6, question: "Apakah tampilan informasi, tanda, kode warna, dan penandaan lainnya telah ditetapkan di area kerja?", score: null, comment: "", photoUrl: null, photoLocal: null }
     ]
   },
   {
     name: "SUSTAIN",
     key: "SUSTAIN",
     questions: [
-      { id: 1, question: "Apakah hasil dari program 6S didokumentasikan dan dipublikasikan secara rutin untuk mempertahankan kesadaran dan komitmen dari departemen?", score: null, comment: "" },
-      { id: 2, question: "Apakah ada program pelatihan berkelanjutan untuk memastikan bahwa semua karyawan memahami pentingnya 6S dan bagaimana menerapkannya?", score: null, comment: "" },
-      { id: 3, question: "Apakah manajemen secara rutin mengadakan tinjauan dan evaluasi untuk memastikan penerapan 6S tetap konsisten?", score: null, comment: "" },
-      { id: 4, question: "Apakah penghargaan atau insentif diberikan kepada karyawan atau tim yang secara konsisten menerapkan dan mempertahankan standar 6S?", score: null, comment: "" },
-      { id: 5, question: "Team memiliki inisiatif untuk improvement di area kerjanya masing-masing, untuk hal-hal yang tidak teridentifikasi saat dilaksanakannya audit/patroli 6S.", score: null, comment: "" }
+      { id: 1, question: "Apakah hasil dari program 6S didokumentasikan dan dipublikasikan secara rutin untuk mempertahankan kesadaran dan komitmen dari departemen?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 2, question: "Apakah ada program pelatihan berkelanjutan untuk memastikan bahwa semua karyawan memahami pentingnya 6S dan bagaimana menerapkannya?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 3, question: "Apakah manajemen secara rutin mengadakan tinjauan dan evaluasi untuk memastikan penerapan 6S tetap konsisten?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 4, question: "Apakah penghargaan atau insentif diberikan kepada karyawan atau tim yang secara konsisten menerapkan dan mempertahankan standar 6S?", score: null, comment: "", photoUrl: null, photoLocal: null },
+      { id: 5, question: "Team memiliki inisiatif untuk improvement di area kerjanya masing-masing, untuk hal-hal yang tidak teridentifikasi saat dilaksanakannya audit/patroli 6S.", score: null, comment: "", photoUrl: null, photoLocal: null }
     ]
   }
 ];
