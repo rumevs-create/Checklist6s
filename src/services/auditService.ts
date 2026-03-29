@@ -219,7 +219,7 @@ export const uploadPhotosAsync = async (
     }
 
     // update Firestore setelah upload selesai
-    const ref = doc(db, COLLECTIONS.AUDITS, auditId);
+    const ref = doc(db!, COLLECTIONS.AUDITS, auditId);
 
     await updateDoc(ref, {
       photos: results,
