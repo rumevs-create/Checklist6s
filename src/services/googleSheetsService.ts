@@ -31,14 +31,13 @@ export const isGoogleSheetsConfigured = (): boolean => {
   return !!GOOGLE_SHEETS_WEBHOOK_URL;
 };
 
-// Prepare data for Google Sheets
+// Prepare data
 export const prepareSheetsData = (
   auditId: string,
   auditState: AuditState,
   summary: AuditSummary,
   photos: PhotoData[]
 ): GoogleSheetsData => {
-  // Format detail scores
   const detailScores = auditState.sections.map(section => {
     const scores = section.questions.map(q => `${q.id}:${q.score || '-'}`).join(',');
     return `${section.name}=[${scores}]`;
@@ -65,7 +64,7 @@ export const prepareSheetsData = (
   };
 };
 
-// Send data to Google Sheets via webhook
+// 🚀 FINAL NON-BLOCKING FUNCTION
 export const sendToGoogleSheets = async (
   auditId: string,
   auditState: AuditState,
@@ -80,131 +79,25 @@ export const sendToGoogleSheets = async (
   try {
     const data = prepareSheetsData(auditId, auditState, summary, photos);
 
-    const response = await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+    console.log("SEND TO SHEETS:", data);
+
+    // 🔥 NON-BLOCKING FETCH
+    fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data)
-    });
+    })
+    .then(res => res.json())
+    .then(result => console.log("Sheets OK:", result))
+    .catch(err => console.error("Sheets ERROR:", err));
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    // 🔥 langsung return tanpa nunggu
+    return true;
 
-    const result = await response.json();
-    return result.success === true;
   } catch (error) {
     console.error('Error sending to Google Sheets:', error);
     return false;
   }
-};
-
-// Export to CSV (fallback method)
-export const exportToCSV = (
-  auditId: string,
-  auditState: AuditState,
-  summary: AuditSummary,
-  photos: PhotoData[]
-): string => {
-  const headers = [
-    'Timestamp',
-    'Audit ID',
-    'Area',
-    'Lokasi',
-    'Auditors',
-    'Tanggal',
-    'AVG_SORT',
-    'AVG_SET_IN_ORDER',
-    'AVG_SAFETY',
-    'AVG_SHINE',
-    'AVG_STANDARDIZE',
-    'AVG_SUSTAIN',
-    'Total Score',
-    'Rata-rata Overall',
-    'Kategori',
-    'Photo URLs',
-    'Detail Scores'
-  ];
-
-  const data = prepareSheetsData(auditId, auditState, summary, photos);
-
-  const rowData = [
-    data.timestamp,
-    data.auditId,
-    data.area,
-    data.lokasi,
-    data.auditors,
-    data.tanggal,
-    data.avgSort.toFixed(2),
-    data.avgSetInOrder.toFixed(2),
-    data.avgSafety.toFixed(2),
-    data.avgShine.toFixed(2),
-    data.avgStandardize.toFixed(2),
-    data.avgSustain.toFixed(2),
-    data.totalScore.toString(),
-    data.avgOverall.toFixed(2),
-    data.kategori,
-    data.photoUrls,
-    data.detailScores
-  ];
-
-  // Add detail questions
-  let csvContent = 'DATA RINGKASAN AUDIT 6S\n';
-  csvContent += headers.join(',') + '\n';
-  csvContent += rowData.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',') + '\n\n';
-
-  // Add detail questions
-  csvContent += 'DATA DETAIL AUDIT 6S\n';
-  csvContent += ['Aspek', 'No', 'Pertanyaan', 'Score', 'Komentar', 'Photo URL'].join(',') + '\n';
-
-  interface Question {
-    id: number;
-    question: string;
-    score: number | null;
-    comment: string;
-  }
-
-  interface Section {
-    name: string;
-    key: string;
-    questions: Question[];
-  }
-
-  auditState.sections.forEach((section: Section) => {
-    section.questions.forEach((q: Question) => {
-      const photo = photos.find(p => p.sectionKey === section.key && p.questionId === q.id);
-      const detailRow = [
-        section.name,
-        q.id.toString(),
-        q.question,
-        q.score?.toString() || '',
-        q.comment || '',
-        photo?.url || ''
-      ];
-      csvContent += detailRow.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',') + '\n';
-    });
-  });
-
-  return csvContent;
-};
-
-// Download CSV file
-export const downloadCSV = (
-  auditId: string,
-  auditState: AuditState,
-  summary: AuditSummary,
-  photos: PhotoData[]
-): void => {
-  const csvContent = exportToCSV(auditId, auditState, summary, photos);
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  
-  link.setAttribute('href', url);
-  link.setAttribute('download', `Audit_6S_${auditState.lokasi}_${auditState.tanggal}_${auditId}.csv`);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 };
