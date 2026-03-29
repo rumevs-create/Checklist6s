@@ -101,3 +101,76 @@ export const sendToGoogleSheets = async (
     return false;
   }
 };
+// Export to CSV
+export const exportToCSV = (
+  auditId: string,
+  auditState: any,
+  summary: any,
+  photos: any[]
+): string => {
+  const headers = [
+    "Timestamp",
+    "Audit ID",
+    "Area",
+    "Lokasi",
+    "Auditors",
+    "Tanggal",
+    "AVG_SORT",
+    "AVG_SET_IN_ORDER",
+    "AVG_SAFETY",
+    "AVG_SHINE",
+    "AVG_STANDARDIZE",
+    "AVG_SUSTAIN",
+    "Total Score",
+    "Rata-rata Overall",
+    "Kategori",
+    "Photo URLs",
+    "Detail Scores",
+  ];
+
+  const row = [
+    new Date().toISOString(),
+    auditId,
+    auditState.area,
+    auditState.lokasi,
+    auditState.auditors.join("; "),
+    auditState.tanggal,
+    summary.avgSort,
+    summary.avgSetInOrder,
+    summary.avgSafety,
+    summary.avgShine,
+    summary.avgStandardize,
+    summary.avgSustain,
+    summary.totalScore,
+    summary.avgOverall,
+    summary.kategori,
+    photos.map((p) => p.url).join("; "),
+    "detail",
+  ];
+
+  let csv = headers.join(",") + "\n";
+  csv += row.map((x) => `"${x}"`).join(",");
+
+  return csv;
+};
+
+// Download CSV
+export const downloadCSV = (
+  auditId: string,
+  auditState: any,
+  summary: any,
+  photos: any[]
+) => {
+  const csv = exportToCSV(auditId, auditState, summary, photos);
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `Audit_${auditId}.csv`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
