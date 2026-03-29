@@ -10,10 +10,13 @@ import {
   orderBy,
   Timestamp,
   type DocumentData,
+  updateDoc,
 } from "firebase/firestore";
+
 import { db, isFirebaseConfigured, COLLECTIONS } from "@/config/firebase";
 import type { AuditState, AuditSummary } from "@/hooks/useAudit";
 import type { PhotoData } from "./photoService";
+import { uploadPhoto } from "./photoService";
 
 export interface AuditRecord {
   id: string;
@@ -37,7 +40,7 @@ export const generateAuditId = (): string => {
   return `audit_${timestamp}_${random}`;
 };
 
-// Save audit to Firestore
+// Save audit
 export const saveAudit = async (
   auditState: AuditState,
   summary: AuditSummary,
@@ -49,7 +52,7 @@ export const saveAudit = async (
   }
 
   const auditId = generateAuditId();
-  const auditRef = doc(db, COLLECTIONS.AUDITS, auditId);
+  const auditRef = doc(db!, COLLECTIONS.AUDITS, auditId);
 
   const auditData: AuditRecord = {
     id: auditId,
@@ -66,13 +69,8 @@ export const saveAudit = async (
     status: "completed",
   };
 
-  try {
-    await setDoc(auditRef, auditData as DocumentData);
-    return auditId;
-  } catch (error) {
-    console.error("Error saving audit:", error);
-    throw error;
-  }
+  await setDoc(auditRef, auditData as DocumentData);
+  return auditId;
 };
 
 // Get audit by ID
@@ -83,18 +81,14 @@ export const getAudit = async (
     throw new Error("Firebase not configured");
   }
 
-  try {
-    const auditRef = doc(db, COLLECTIONS.AUDITS, auditId);
-    const auditSnap = await getDoc(auditRef);
+  const auditRef = doc(db!, COLLECTIONS.AUDITS, auditId);
+  const auditSnap = await getDoc(auditRef);
 
-    if (auditSnap.exists()) {
-      return auditSnap.data() as AuditRecord;
-    }
-    return null;
-  } catch (error) {
-    console.error("Error getting audit:", error);
-    throw error;
+  if (auditSnap.exists()) {
+    return auditSnap.data() as AuditRecord;
   }
+
+  return null;
 };
 
 // Get audits by date range
@@ -106,46 +100,40 @@ export const getAuditsByDateRange = async (
     throw new Error("Firebase not configured");
   }
 
-  try {
-    const auditsRef = collection(db, COLLECTIONS.AUDITS);
-    const q = query(
-      auditsRef,
-      where("tanggal", ">=", startDate),
-      where("tanggal", "<=", endDate),
-      orderBy("tanggal", "desc")
-    );
+  const auditsRef = collection(db!, COLLECTIONS.AUDITS);
 
-    const querySnap = await getDocs(q);
-    return querySnap.docs.map((doc) => doc.data() as AuditRecord);
-  } catch (error) {
-    console.error("Error getting audits:", error);
-    throw error;
-  }
+  const q = query(
+    auditsRef,
+    where("tanggal", ">=", startDate),
+    where("tanggal", "<=", endDate),
+    orderBy("tanggal", "desc")
+  );
+
+  const querySnap = await getDocs(q);
+  return querySnap.docs.map((doc) => doc.data() as AuditRecord);
 };
 
 // Get audits by area
-export const getAuditsByArea = async (area: string): Promise<AuditRecord[]> => {
+export const getAuditsByArea = async (
+  area: string
+): Promise<AuditRecord[]> => {
   if (!isFirebaseConfigured() || !db) {
     throw new Error("Firebase not configured");
   }
 
-  try {
-    const auditsRef = collection(db, COLLECTIONS.AUDITS);
-    const q = query(
-      auditsRef,
-      where("area", "==", area),
-      orderBy("createdAt", "desc")
-    );
+  const auditsRef = collection(db!, COLLECTIONS.AUDITS);
 
-    const querySnap = await getDocs(q);
-    return querySnap.docs.map((doc) => doc.data() as AuditRecord);
-  } catch (error) {
-    console.error("Error getting audits:", error);
-    throw error;
-  }
+  const q = query(
+    auditsRef,
+    where("area", "==", area),
+    orderBy("createdAt", "desc")
+  );
+
+  const querySnap = await getDocs(q);
+  return querySnap.docs.map((doc) => doc.data() as AuditRecord);
 };
 
-// Get all audits (with limit)
+// Get all audits
 export const getAllAudits = async (
   limit: number = 100
 ): Promise<AuditRecord[]> => {
@@ -153,18 +141,13 @@ export const getAllAudits = async (
     throw new Error("Firebase not configured");
   }
 
-  try {
-    const auditsRef = collection(db, COLLECTIONS.AUDITS);
-    const q = query(auditsRef, orderBy("createdAt", "desc"));
+  const auditsRef = collection(db!, COLLECTIONS.AUDITS);
+  const q = query(auditsRef, orderBy("createdAt", "desc"));
 
-    const querySnap = await getDocs(q);
-    return querySnap.docs
-      .slice(0, limit)
-      .map((doc) => doc.data() as AuditRecord);
-  } catch (error) {
-    console.error("Error getting audits:", error);
-    throw error;
-  }
+  const querySnap = await getDocs(q);
+  return querySnap.docs
+    .slice(0, limit)
+    .map((doc) => doc.data() as AuditRecord);
 };
 
 // Update audit status
@@ -176,31 +159,31 @@ export const updateAuditStatus = async (
     throw new Error("Firebase not configured");
   }
 
-  try {
-    const auditRef = doc(db, COLLECTIONS.AUDITS, auditId);
-    await setDoc(
-      auditRef,
-      {
-        status,
-        updatedAt: Timestamp.now(),
-      },
-      { merge: true }
-    );
-  } catch (error) {
-    console.error("Error updating audit status:", error);
-    throw error;
-  }
+  const auditRef = doc(db!, COLLECTIONS.AUDITS, auditId);
+
+  await setDoc(
+    auditRef,
+    {
+      status,
+      updatedAt: Timestamp.now(),
+    },
+    { merge: true }
+  );
 };
-import { uploadPhoto } from "./photoService";
-import { updateDoc } from "firebase/firestore";
+
+// 🚀 BACKGROUND PHOTO UPLOAD (NON-BLOCKING)
 export const uploadPhotosAsync = async (
   auditId: string,
-  photos: Array<{ sectionKey: string; questionId: number; imageBase64: string }>
+  photos: Array<{
+    sectionKey: string;
+    questionId: number;
+    imageBase64: string;
+  }>
 ) => {
   try {
     console.log("START BACKGROUND UPLOAD");
 
-    const results = [];
+    const results: PhotoData[] = [];
 
     for (const photo of photos) {
       try {
