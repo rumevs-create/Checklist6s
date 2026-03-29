@@ -60,94 +60,54 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Submit audit to Firebase and Google Sheets
-  const handleSubmitAudit = async () => {
-    if (!isComplete) {
-      toast.error('Data audit belum lengkap!');
-      return;
+const handleSubmitAudit = async () => {
+  if (!isComplete) {
+    toast.error("Data audit belum lengkap!");
+    return;
+  }
+
+  if (!hasScores) {
+    toast.error("Belum ada penilaian yang diisi!");
+    return;
+  }
+
+  setIsSubmitting(true);
+  const toastId = toast.loading("Menyimpan audit...");
+
+  try {
+    // ambil foto tapi jangan upload dulu
+    const pendingPhotos = getPendingPhotos();
+
+    // 1. save audit dulu
+    let auditId = "";
+    if (isFirebaseConfigured()) {
+      toast.loading("Menyimpan ke database...", { id: toastId });
+      auditId = await saveAudit(auditState, summary, []);
     }
 
-    if (!hasScores) {
-      toast.error('Belum ada penilaian yang diisi!');
-      return;
+    // 2. upload foto di background
+    if (pendingPhotos.length > 0) {
+      uploadPhotosAsync(auditId, pendingPhotos);
     }
 
-    setIsSubmitting(true);
-    const toastId = toast.loading('Menyimpan audit...');
+    // 3. kirim ke Google Sheets (tanpa foto dulu)
+    toast.loading("Mengirim ke Google Sheets...", { id: toastId });
+    await sendToGoogleSheets(auditId, auditState, summary, []);
 
-    try {
-      // 1. Upload photos first
-      const pendingPhotos = getPendingPhotos();
-      const uploadedPhotos: Array<{
-        sectionKey: string;
-        questionId: number;
-        url: string;
-        fileName: string;
-        uploadedAt: string;
-      }> = [];
+    toast.success("Audit berhasil disimpan!", { id: toastId });
 
-      if (pendingPhotos.length > 0) {
-        toast.loading(`Mengupload ${pendingPhotos.length} foto...`, { id: toastId });
-        
-        // Generate temporary audit ID for photo paths
-        const tempAuditId = `audit_${Date.now()}`;
-        
-        for (const photo of pendingPhotos) {
-          try {
-            const photoData = await uploadPhoto(
-              tempAuditId,
-              photo.sectionKey,
-              photo.questionId,
-              photo.imageBase64
-            );
-            
-            uploadedPhotos.push({
-              sectionKey: photo.sectionKey,
-              questionId: photo.questionId,
-              url: photoData.url,
-              fileName: photoData.fileName,
-              uploadedAt: photoData.uploadedAt
-            });
+    setTimeout(() => {
+      resetAudit();
+      scrollToTop();
+    }, 2000);
 
-            // Update photo URL in state
-            updatePhotoUrl(photo.sectionKey, photo.questionId, photoData.url);
-          } catch (error) {
-            console.error('Error uploading photo:', error);
-          }
-        }
-      }
-
-      // 2. Save audit to Firestore (if Firebase configured)
-      let auditId = '';
-      if (isFirebaseConfigured()) {
-        toast.loading('Menyimpan ke database...', { id: toastId });
-        auditId = await saveAudit(auditState, summary, uploadedPhotos);
-      }
-
-      // 3. Send to Google Sheets
-      toast.loading('Mengirim ke Google Sheets...', { id: toastId });
-      const sheetsSuccess = await sendToGoogleSheets(auditId, auditState, summary, uploadedPhotos);
-
-      // 4. Show success message
-      toast.success(
-        `Audit berhasil disimpan!${sheetsSuccess ? ' Data masuk ke Google Sheets.' : ''}`,
-        { id: toastId }
-      );
-
-      // 5. Reset form after successful submission
-      setTimeout(() => {
-        resetAudit();
-        scrollToTop();
-      }, 2000);
-
-    } catch (error) {
-      console.error('Error submitting audit:', error);
-      toast.error('Gagal menyimpan audit. Silakan coba lagi.', { id: toastId });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
+  } catch (error) {
+    console.error("Error submitting audit:", error);
+    toast.error("Gagal menyimpan audit", { id: toastId });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   // Export to CSV fallback
   const handleExportCSV = () => {
     const auditId = `audit_${Date.now()}`;
