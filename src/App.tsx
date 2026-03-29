@@ -25,7 +25,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 import { isFirebaseConfigured } from '@/config/firebase';
 import { uploadPhoto } from '@/services/photoService';
-import { saveAudit } from '@/services/auditService';
+import { saveAudit, uploadPhotosAsync } from '@/services/auditService';
 import { sendToGoogleSheets, downloadCSV } from '@/services/googleSheetsService';
 
 function App() {
