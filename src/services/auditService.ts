@@ -191,4 +191,42 @@ export const updateAuditStatus = async (
     throw error;
   }
 };
-import { uploadToCloudinary } from "@/services/cloudinaryService";
+import { uploadPhoto } from "./photoService";
+import { updateDoc } from "firebase/firestore";
+export const uploadPhotosAsync = async (
+  auditId: string,
+  photos: Array<{ sectionKey: string; questionId: number; imageBase64: string }>
+) => {
+  try {
+    console.log("START BACKGROUND UPLOAD");
+
+    const results = [];
+
+    for (const photo of photos) {
+      try {
+        const uploaded = await uploadPhoto(
+          auditId,
+          photo.sectionKey,
+          photo.questionId,
+          photo.imageBase64
+        );
+
+        results.push(uploaded);
+        console.log("UPLOAD OK:", uploaded.url);
+      } catch (err) {
+        console.error("UPLOAD ERROR:", err);
+      }
+    }
+
+    // update Firestore setelah upload selesai
+    const ref = doc(db, COLLECTIONS.AUDITS, auditId);
+
+    await updateDoc(ref, {
+      photos: results,
+    });
+
+    console.log("FIRESTORE UPDATED WITH PHOTOS");
+  } catch (err) {
+    console.error("BACKGROUND UPLOAD ERROR:", err);
+  }
+};
