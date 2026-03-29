@@ -2,7 +2,9 @@
 import type { AuditState, AuditSummary } from '@/hooks/useAudit';
 import type { PhotoData } from './photoService';
 
-const GOOGLE_SHEETS_WEBHOOK_URL = import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL || '';
+const GOOGLE_SHEETS_WEBHOOK_URL =
+  import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
+  "https://script.google.com/macros/s/AKfycbwstSSGqDC2KFhUdnHiYgL5eGmngzNYuUmvnkUJzd5SuMep_MgeutwiP77uzZGV-OuC/exec";
 
 export interface GoogleSheetsData {
   timestamp: string;
