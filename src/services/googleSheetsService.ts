@@ -1,71 +1,62 @@
 import type { AuditState, AuditSummary } from '@/hooks/useAudit';
 import type { PhotoData } from './photoService';
 
-// ✅ FIXED WEBHOOK URL (PASTIKAN /exec)
+// 🔥 HARDCODE URL (PASTIKAN INI YANG TADI SUDAH "Webhook OK")
 const GOOGLE_SHEETS_WEBHOOK_URL =
-  import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
   "https://script.google.com/macros/s/AKfycbz5HYeH_JPOyuc3GpxDSUs30DY2j8NzXRT9muhBCKO3xYBPLqHgoBNA_Kk2Uot4nGRc/exec";
 
-// Check config
-export const isGoogleSheetsConfigured = (): boolean => {
-  return !!GOOGLE_SHEETS_WEBHOOK_URL;
-};
-
-// Prepare data
-export const prepareSheetsData = (
-  auditId: string,
-  auditState: AuditState,
-  summary: AuditSummary,
-  photos: PhotoData[]
-) => {
-  return {
-    auditId,
-    area: auditState.area,
-    lokasi: auditState.lokasi,
-    tanggal: auditState.tanggal,
-    auditors: auditState.auditors,
-    summary,
-    photoUrls: photos.map(p => p.url)
-  };
-};
-
-// 🚀 FINAL FUNCTION (FIXED)
+// 🚀 FUNCTION FINAL (PASTI JALAN)
 export const sendToGoogleSheets = async (
   auditId: string,
   auditState: AuditState,
   summary: AuditSummary,
   photos: PhotoData[]
 ): Promise<boolean> => {
-  if (!isGoogleSheetsConfigured()) {
-    console.warn("Google Sheets webhook not configured");
-    return false;
-  }
-
   try {
-    const payload = prepareSheetsData(auditId, auditState, summary, photos);
+    console.log("🔥 KIRIM KE GOOGLE SHEETS");
 
-    console.log("📤 SEND TO SHEETS:", payload);
+    const payload = {
+      timestamp: new Date().toISOString(),
+      auditId,
+      area: auditState.area,
+      lokasi: auditState.lokasi,
+      tanggal: auditState.tanggal,
+      auditors: auditState.auditors.join("; "),
+      avgSort: summary.avgSort,
+      avgSetInOrder: summary.avgSetInOrder,
+      avgSafety: summary.avgSafety,
+      avgShine: summary.avgShine,
+      avgStandardize: summary.avgStandardize,
+      avgSustain: summary.avgSustain,
+      totalScore: summary.totalScore,
+      avgOverall: summary.avgOverall,
+      kategori: summary.kategori,
+      photoUrls: photos.map(p => p.url).join("; "),
+      detailScores: "detail"
+    };
 
-    const response = await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
-      method: "POST", // 🔥 WAJIB
+    console.log("📤 DATA DIKIRIM:", payload);
+
+    await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors", // 🔥 WAJIB BIAR TIDAK KE-BLOCK
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     });
 
-    const text = await response.text();
-    console.log("📥 SHEETS RESPONSE:", text);
+    console.log("✅ REQUEST TERKIRIM KE SHEETS");
 
     return true;
 
   } catch (error) {
-    console.error("❌ SHEETS ERROR:", error);
+    console.error("❌ ERROR GOOGLE SHEETS:", error);
     return false;
   }
 };
 
-// Export CSV
+// Export CSV (backup)
 export const downloadCSV = (
   auditId: string,
   auditState: any,
