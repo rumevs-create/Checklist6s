@@ -4,7 +4,6 @@ import type { PhotoData } from './photoService';
 // 🔥 URL WEBHOOK (SUDAH BENAR)
 const GOOGLE_SHEETS_WEBHOOK_URL =
   "https://script.google.com/macros/s/AKfycbz5HYeH_JPOyuc3GpxDSUs30DY2j8NzXRT9muhBCKO3xYBPLqHgoBNA_Kk2Uot4nGRc/exec";
-
 // 🚀 FUNCTION KIRIM KE GOOGLE SHEETS
 export const sendToGoogleSheets = async (
   auditId: string,
