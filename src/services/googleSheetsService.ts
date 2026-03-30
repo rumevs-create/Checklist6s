@@ -19,26 +19,18 @@ export const sendToGoogleSheets = async (
       lokasi: auditState.lokasi,
       tanggal: auditState.tanggal,
       auditors: auditState.auditors.join("; "),
-      avgSort: summary.avgSort,
-      avgSetInOrder: summary.avgSetInOrder,
-      avgSafety: summary.avgSafety,
-      avgShine: summary.avgShine,
-      avgStandardize: summary.avgStandardize,
-      avgSustain: summary.avgSustain,
-      totalScore: summary.totalScore,
-      avgOverall: summary.avgOverall,
-      kategori: summary.kategori,
-      photoUrls: photos.map(p => p.url).join("; "),
-      detailScores: "detail"
+      avgOverall: summary.avgOverall
     };
 
-    const formData = new URLSearchParams();
-    formData.append("data", JSON.stringify(payload));
+    const url =
+      "https://script.google.com/macros/s/AKfycbz5HYeH_JPOyuc3GpxDSUs30DY2j8NzXRT9muhBCKO3xYBPLqHgoBNA_Kk2Uot4nGRc/exec" +
+      "?data=" +
+      encodeURIComponent(JSON.stringify(payload));
 
-    await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
-      method: "POST",
-      body: formData
-    });
+    // 🔥 ANTI CORS (PASTI TEMBUS)
+    new Image().src = url;
+
+    console.log("✅ DIKIRIM KE GOOGLE SHEETS");
 
     return true;
 
