@@ -4,7 +4,7 @@ import type { PhotoData } from './photoService';
 // ✅ FIXED WEBHOOK URL (PASTIKAN /exec)
 const GOOGLE_SHEETS_WEBHOOK_URL =
   import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
-  "https://script.google.com/macros/s/AKfycbwstSSGqDC2KFhUdnHiYgL5eGmngzNYuUmvnkUJzd5SuMep_MgeutwiP77uzZGV-OuC/exec";
+  "https://script.google.com/macros/s/AKfycbz5HYeH_JPOyuc3GpxDSUs30DY2j8NzXRT9muhBCKO3xYBPLqHgoBNA_Kk2Uot4nGRc/exec";
 
 // Check config
 export const isGoogleSheetsConfigured = (): boolean => {
