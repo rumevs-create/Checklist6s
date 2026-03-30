@@ -1,11 +1,3 @@
-import type { AuditState, AuditSummary } from '@/hooks/useAudit';
-import type { PhotoData } from './photoService';
-
-// 🔥 HARDCODE URL (PASTIKAN INI YANG TADI SUDAH "Webhook OK")
-const GOOGLE_SHEETS_WEBHOOK_URL =
-  "https://script.google.com/macros/s/AKfycbz5HYeH_JPOyuc3GpxDSUs30DY2j8NzXRT9muhBCKO3xYBPLqHgoBNA_Kk2Uot4nGRc/exec";
-
-// 🚀 FUNCTION FINAL (PASTI JALAN)
 export const sendToGoogleSheets = async (
   auditId: string,
   auditState: AuditState,
@@ -35,63 +27,22 @@ export const sendToGoogleSheets = async (
       detailScores: "detail"
     };
 
-    console.log("📤 DATA DIKIRIM:", payload);
+    console.log("📤 DATA:", payload);
+
+    const formData = new URLSearchParams();
+    formData.append("data", JSON.stringify(payload));
 
     await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
       method: "POST",
-      mode: "no-cors", // 🔥 WAJIB BIAR TIDAK KE-BLOCK
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+      body: formData
     });
 
-    console.log("✅ REQUEST TERKIRIM KE SHEETS");
+    console.log("✅ REQUEST TERKIRIM");
 
     return true;
 
   } catch (error) {
-    console.error("❌ ERROR GOOGLE SHEETS:", error);
+    console.error("❌ ERROR:", error);
     return false;
   }
-};
-
-// Export CSV (backup)
-export const downloadCSV = (
-  auditId: string,
-  auditState: any,
-  summary: any,
-  photos: any[]
-) => {
-  const headers = [
-    "Audit ID",
-    "Area",
-    "Lokasi",
-    "Tanggal",
-    "Auditors",
-    "Avg Overall",
-  ];
-
-  const row = [
-    auditId,
-    auditState.area,
-    auditState.lokasi,
-    auditState.tanggal,
-    auditState.auditors.join("; "),
-    summary.avgOverall,
-  ];
-
-  let csv = headers.join(",") + "\n";
-  csv += row.map((x) => `"${x}"`).join(",");
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `Audit_${auditId}.csv`;
-
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 };
