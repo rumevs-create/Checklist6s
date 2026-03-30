@@ -4,7 +4,7 @@ import type { PhotoData } from './photoService';
 
 const GOOGLE_SHEETS_WEBHOOK_URL =
   import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
-  "https://script.google.com/macros/s/AKfycbwstSSGqDC2KFhUdnHiYgL5eGmngzNYuUmvnkUJzd5SuMep_MgeutwiP77uzZGV-OuC/exec";
+  "https://script.google.com/macros/library/d/1XAa2VBRhsL1PW6C0Z391MEo53G-XLFF45J1J2zNT1GAnCc8ff4WTNyh7/1";
 
 export interface GoogleSheetsData {
   timestamp: string;
