@@ -1,32 +1,12 @@
-// Google Sheets Integration Service
 import type { AuditState, AuditSummary } from '@/hooks/useAudit';
 import type { PhotoData } from './photoService';
 
+// ✅ FIXED WEBHOOK URL (PASTIKAN /exec)
 const GOOGLE_SHEETS_WEBHOOK_URL =
   import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
-  "https://script.google.com/macros/library/d/1XAa2VBRhsL1PW6C0Z391MEo53G-XLFF45J1J2zNT1GAnCc8ff4WTNyh7/1";
+  "https://script.google.com/macros/s/AKfycbwstSSGqDC2KFhUdnHiYgL5eGmngzNYuUmvnkUJzd5SuMep_MgeutwiP77uzZGV-OuC/exec";
 
-export interface GoogleSheetsData {
-  timestamp: string;
-  auditId: string;
-  area: string;
-  lokasi: string;
-  auditors: string;
-  tanggal: string;
-  avgSort: number;
-  avgSetInOrder: number;
-  avgSafety: number;
-  avgShine: number;
-  avgStandardize: number;
-  avgSustain: number;
-  totalScore: number;
-  avgOverall: number;
-  kategori: string;
-  photoUrls: string;
-  detailScores: string;
-}
-
-// Check if Google Sheets is configured
+// Check config
 export const isGoogleSheetsConfigured = (): boolean => {
   return !!GOOGLE_SHEETS_WEBHOOK_URL;
 };
@@ -37,34 +17,19 @@ export const prepareSheetsData = (
   auditState: AuditState,
   summary: AuditSummary,
   photos: PhotoData[]
-): GoogleSheetsData => {
-  const detailScores = auditState.sections.map(section => {
-    const scores = section.questions.map(q => `${q.id}:${q.score || '-'}`).join(',');
-    return `${section.name}=[${scores}]`;
-  }).join(' | ');
-
+) => {
   return {
-    timestamp: new Date().toISOString(),
     auditId,
     area: auditState.area,
     lokasi: auditState.lokasi,
-    auditors: auditState.auditors.join('; '),
     tanggal: auditState.tanggal,
-    avgSort: summary.avgSort,
-    avgSetInOrder: summary.avgSetInOrder,
-    avgSafety: summary.avgSafety,
-    avgShine: summary.avgShine,
-    avgStandardize: summary.avgStandardize,
-    avgSustain: summary.avgSustain,
-    totalScore: summary.totalScore,
-    avgOverall: summary.avgOverall,
-    kategori: summary.kategori,
-    photoUrls: photos.map(p => p.url).join('; '),
-    detailScores
+    auditors: auditState.auditors,
+    summary,
+    photoUrls: photos.map(p => p.url)
   };
 };
 
-// 🚀 FINAL NON-BLOCKING FUNCTION
+// 🚀 FINAL FUNCTION (FIXED)
 export const sendToGoogleSheets = async (
   auditId: string,
   auditState: AuditState,
@@ -72,96 +37,61 @@ export const sendToGoogleSheets = async (
   photos: PhotoData[]
 ): Promise<boolean> => {
   if (!isGoogleSheetsConfigured()) {
-    console.warn('Google Sheets webhook not configured');
+    console.warn("Google Sheets webhook not configured");
     return false;
   }
 
   try {
-    const data = prepareSheetsData(auditId, auditState, summary, photos);
+    const payload = prepareSheetsData(auditId, auditState, summary, photos);
 
-    console.log("SEND TO SHEETS:", data);
+    console.log("📤 SEND TO SHEETS:", payload);
 
-    // 🔥 NON-BLOCKING FETCH
-    fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
-      method: 'POST',
+    const response = await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+      method: "POST", // 🔥 WAJIB
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(result => console.log("Sheets OK:", result))
-    .catch(err => console.error("Sheets ERROR:", err));
+      body: JSON.stringify(payload),
+    });
 
-    // 🔥 langsung return tanpa nunggu
+    const text = await response.text();
+    console.log("📥 SHEETS RESPONSE:", text);
+
     return true;
 
   } catch (error) {
-    console.error('Error sending to Google Sheets:', error);
+    console.error("❌ SHEETS ERROR:", error);
     return false;
   }
 };
-// Export to CSV
-export const exportToCSV = (
-  auditId: string,
-  auditState: any,
-  summary: any,
-  photos: any[]
-): string => {
-  const headers = [
-    "Timestamp",
-    "Audit ID",
-    "Area",
-    "Lokasi",
-    "Auditors",
-    "Tanggal",
-    "AVG_SORT",
-    "AVG_SET_IN_ORDER",
-    "AVG_SAFETY",
-    "AVG_SHINE",
-    "AVG_STANDARDIZE",
-    "AVG_SUSTAIN",
-    "Total Score",
-    "Rata-rata Overall",
-    "Kategori",
-    "Photo URLs",
-    "Detail Scores",
-  ];
 
-  const row = [
-    new Date().toISOString(),
-    auditId,
-    auditState.area,
-    auditState.lokasi,
-    auditState.auditors.join("; "),
-    auditState.tanggal,
-    summary.avgSort,
-    summary.avgSetInOrder,
-    summary.avgSafety,
-    summary.avgShine,
-    summary.avgStandardize,
-    summary.avgSustain,
-    summary.totalScore,
-    summary.avgOverall,
-    summary.kategori,
-    photos.map((p) => p.url).join("; "),
-    "detail",
-  ];
-
-  let csv = headers.join(",") + "\n";
-  csv += row.map((x) => `"${x}"`).join(",");
-
-  return csv;
-};
-
-// Download CSV
+// Export CSV
 export const downloadCSV = (
   auditId: string,
   auditState: any,
   summary: any,
   photos: any[]
 ) => {
-  const csv = exportToCSV(auditId, auditState, summary, photos);
+  const headers = [
+    "Audit ID",
+    "Area",
+    "Lokasi",
+    "Tanggal",
+    "Auditors",
+    "Avg Overall",
+  ];
+
+  const row = [
+    auditId,
+    auditState.area,
+    auditState.lokasi,
+    auditState.tanggal,
+    auditState.auditors.join("; "),
+    summary.avgOverall,
+  ];
+
+  let csv = headers.join(",") + "\n";
+  csv += row.map((x) => `"${x}"`).join(",");
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
