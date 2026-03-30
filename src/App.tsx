@@ -363,3 +363,97 @@ const handleSubmitAudit = async () => {
 }
 
 export default App;
+const handleSubmitAudit = async () => {
+  if (!isComplete) {
+    toast.error("Data audit belum lengkap!");
+    return;
+  }
+
+  if (!hasScores) {
+    toast.error("Belum ada penilaian yang diisi!");
+    return;
+  }
+
+  setIsSubmitting(true);
+  const toastId = toast.loading("Menyimpan audit...");
+
+  try {
+    // 🔥 1. Generate auditId SEKALI (penting!)
+    const auditId = `audit_${Date.now()}`;
+
+    // 🔥 2. Upload semua foto dulu
+    const pendingPhotos = getPendingPhotos();
+    const uploadedPhotos: PhotoData[] = [];
+
+    if (pendingPhotos.length > 0) {
+      toast.loading(`Upload ${pendingPhotos.length} foto...`, { id: toastId });
+
+      for (let i = 0; i < pendingPhotos.length; i++) {
+        const photo = pendingPhotos[i];
+
+        try {
+          const photoData = await uploadPhoto(
+            auditId,
+            photo.sectionKey,
+            photo.questionId,
+            photo.imageBase64
+          );
+
+          uploadedPhotos.push(photoData);
+
+          // update URL di state (biar langsung ke-link)
+          updatePhotoUrl(photo.sectionKey, photo.questionId, photoData.url);
+
+        } catch (error) {
+          console.error("Upload foto gagal:", error);
+          throw new Error("Gagal upload foto"); // ❗ langsung stop
+        }
+      }
+    }
+
+    // 🔥 3. Simpan ke Firestore
+    if (isFirebaseConfigured()) {
+      toast.loading("Menyimpan ke database...", { id: toastId });
+
+      await saveAudit(
+        {
+          ...auditState,
+          id: auditId, // optional kalau mau disimpan juga di state
+        },
+        summary,
+        uploadedPhotos
+      );
+    }
+
+    // 🔥 4. Kirim ke Google Sheets
+    toast.loading("Mengirim ke Google Sheets...", { id: toastId });
+
+    const sheetsSuccess = await sendToGoogleSheets(
+      auditId,
+      auditState,
+      summary,
+      uploadedPhotos
+    );
+
+    // 🔥 5. Success
+    toast.success(
+      `Audit berhasil disimpan!${
+        sheetsSuccess ? " (Sheets ✔)" : " (Sheets ❌)"
+      }`,
+      { id: toastId }
+    );
+
+    // 🔥 6. Reset form
+    setTimeout(() => {
+      resetAudit();
+      scrollToTop();
+    }, 1500);
+
+  } catch (error) {
+    console.error("Error submit audit:", error);
+    toast.error("Gagal menyimpan audit!", { id: toastId });
+
+  } finally {
+    setIsSubmitting(false);
+  }
+};
